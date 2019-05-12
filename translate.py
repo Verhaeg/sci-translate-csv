@@ -12,13 +12,10 @@ import glob, sys, csv, os, shutil
 
 def read_wasatch(file):
     list = []
-    list.append([os.path.splitext(os.path.basename(file))[0]])
 
     with open(file) as f:
-        lines = f.readlines()[4:]
-        for idx, line in enumerate(lines):
-            data = line.rstrip().split(',')[17:]
-            list.append([idx+1] + data)
+        data = f.readlines()[4].rstrip().split(',')[17:]
+        list.append([os.path.splitext(os.path.basename(file))[0]] + data)
     return list
 
 def read_spectrum(file):
@@ -67,6 +64,9 @@ def merge(data, file_data):
     return data
 
 def write_file(output, data):
+    if not len(data):
+        print("No data to write, skipping")
+        return
     with open(output, mode='w', newline='') as output_file:
         writer = csv.writer(output_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         for line in data:
@@ -83,10 +83,7 @@ def process_wasatch(folder):
         print("Processing file '{}'".format(file))
         file_data = read_wasatch(file)
         print("Found {} lines in file".format(len(file_data)))
-        if (len(data) == 0):
-            data = file_data
-        else:
-            data = merge(data, file_data)
+        data = data+file_data
         print()
 
     write_file(output, data)
